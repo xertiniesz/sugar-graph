@@ -27,7 +27,6 @@ export default class App extends React.Component {
         {
           this.state.content === 'diagram' ? <Diagram /> : <Table />
         }
-
       </div>
     )
   }

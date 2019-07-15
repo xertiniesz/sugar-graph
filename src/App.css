@@ -13,14 +13,31 @@
   height: 100%;
 }
 
-.body {
+.content {
   display: block;
-  padding: 1vh;
-  border: 1px;
   min-width: 600px;
   width: 100%;
 }
 
+.body {
+  width: 100%;
+  height: calc(100% - 46px);
+  overflow: scroll;
+}
+
+.spread-sheet {
+  margin-top: 40px;
+}
+
+.bar {
+  top: 0;
+  padding: 0.2em;
+  width: 100%;
+  height: 40px;
+  background-color: #222327;
+  float: right;
+  position: sticky;
+}
 /*
 color1
  */

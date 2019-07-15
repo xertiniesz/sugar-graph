@@ -4,6 +4,7 @@ import { makeStyles } from '@material-ui/core/styles';
 import Card from '@material-ui/core/Card';
 import Paper from '@material-ui/core/Paper';
 import Grid from '@material-ui/core/Grid';
+import Typography from '@material-ui/core/Typography';
 import { Line } from 'react-chartjs-2';
 
 function Diagram() {
@@ -96,33 +97,40 @@ function Diagram() {
   }
 
   return(
-    <Grid className={classes.paper} container spacing={2} style={{ margin: 0, width: '100%', }}>
-      <Grid item xs={12}>
-        <Card className={classes.cardGraph}>
-          <img src={logo} />
-        </Card>
+    <div className="body">
+      <Grid className={classes.paper} container spacing={2} style={{ margin: 0, width: '100%', }}>
+        <Grid item xs={12}>
+          <Card className={classes.cardGraph}>
+            <Typography variant="h4">Diagram</Typography>
+            <img src={logo} />
+          </Card>
+        </Grid>
+        <Grid item xs={12}>
+          <Card className={classes.cardGraph}>
+            <Typography variant="h4">Graph</Typography>
+            <Line data={data} options={options}/>
+          </Card>
+        </Grid>
+        <Grid item xs={12}>
+          <Card className={classes.cardGraph}>
+            <Typography variant="h4">Graph 1</Typography>
+            <Line data={data1} options={options}/>
+          </Card>
+        </Grid>
+        <Grid item xs={12}>
+          <Card className={classes.cardGraph}>
+            <Typography variant="h4">Graph 2</Typography>
+            <Line data={data2} options={options}/>
+          </Card>
+        </Grid>
+        <Grid item xs={12}>
+          <Card className={classes.cardGraph}>
+            <Typography variant="h4">Graph 3</Typography>
+            <Line data={data3} options={options}/>
+          </Card>
+        </Grid>
       </Grid>
-      <Grid item xs={12}>
-        <Card className={classes.cardGraph}>
-          <Line data={data} options={options}/>
-        </Card>
-      </Grid>
-      <Grid item xs={12}>
-        <Card className={classes.cardGraph}>
-          <Line data={data1} options={options}/>
-        </Card>
-      </Grid>
-      <Grid item xs={12}>
-        <Card className={classes.cardGraph}>
-          <Line data={data2} options={options}/>
-        </Card>
-      </Grid>
-      <Grid item xs={12}>
-        <Card className={classes.cardGraph}>
-          <Line data={data3} options={options}/>
-        </Card>
-      </Grid>
-    </Grid>
+    </div>
   );
 }
 
