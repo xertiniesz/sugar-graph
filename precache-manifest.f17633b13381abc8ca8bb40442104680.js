@@ -1,6 +1,6 @@
 self.__precacheManifest = (self.__precacheManifest || []).concat([
   {
-    "revision": "c1c48a291be2c243990607eab948a7c3",
+    "revision": "02c1b42b4a8d5f0bcf9ce40b9d86ea70",
     "url": "/sugar-graph/index.html"
   },
   {
@@ -8,7 +8,7 @@ self.__precacheManifest = (self.__precacheManifest || []).concat([
     "url": "/sugar-graph/static/css/2.157a592c.chunk.css"
   },
   {
-    "revision": "1e9cc8784ccb30758fe5",
+    "revision": "09161672fee389168b3b",
     "url": "/sugar-graph/static/css/main.f6688e6b.chunk.css"
   },
   {
@@ -16,8 +16,8 @@ self.__precacheManifest = (self.__precacheManifest || []).concat([
     "url": "/sugar-graph/static/js/2.bcfb6fcc.chunk.js"
   },
   {
-    "revision": "1e9cc8784ccb30758fe5",
-    "url": "/sugar-graph/static/js/main.71422b1e.chunk.js"
+    "revision": "09161672fee389168b3b",
+    "url": "/sugar-graph/static/js/main.6fc712d2.chunk.js"
   },
   {
     "revision": "91ef01cd2924b69228f9",
