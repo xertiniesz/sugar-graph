@@ -1,9 +1,8 @@
 import React from 'react';
-import { makeStyles } from '@material-ui/core/styles';
 import MenuList from '@material-ui/core/MenuList';
 import MenuItem from '@material-ui/core/MenuItem';
 import Diagram from './Diagram.js';
-import Table from './Table.js';
+import Graph from './Graph.js';
 import './App.css';
 
 export default class App extends React.Component {
@@ -11,6 +10,7 @@ export default class App extends React.Component {
     content: 'diagram',
   }
   render() {
+    console.log(<Diagram/>)
     return(
       <div className="warpper">
         <div className="side-bar">
@@ -19,13 +19,13 @@ export default class App extends React.Component {
             <MenuItem onClick={()=>this.setState({content: 'diagram'})}>
               Diagram
             </MenuItem>
-            <MenuItem onClick={()=>this.setState({content: 'table'})}>
-              Table
+            <MenuItem onClick={()=>this.setState({content: 'graph'})}>
+              Graph
             </MenuItem>
           </MenuList>
         </div>
         {
-          this.state.content === 'diagram' ? <Diagram /> : <Table />
+          this.state.content === 'diagram' ? <Diagram /> : <Graph />
         }
       </div>
     )
