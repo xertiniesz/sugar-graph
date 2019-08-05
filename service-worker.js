@@ -14,7 +14,7 @@
 importScripts("https://storage.googleapis.com/workbox-cdn/releases/4.3.1/workbox-sw.js");
 
 importScripts(
-  "/sugar-graph/precache-manifest.26c035a0be26cf1360109a511bc0d7cd.js"
+  "/sugar-graph/precache-manifest.d1c3ebd464cb3c424aa59d3011d63d11.js"
 );
 
 self.addEventListener('message', (event) => {
