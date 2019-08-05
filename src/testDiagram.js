@@ -4,7 +4,6 @@ function getData(date, dataCol, tableData) {
   let tabData = {}
   tableData.forEach(row => {tabData = {...tabData, [row[1].value]: row}})
   if (tabData[date]) {
-    console.log(tabData[date][dataCol+1] ? tabData[date][dataCol+1].value : 'undefined')
   }
   if (tabData[date])
     return tabData[date][dataCol+1] ? tabData[date][dataCol+1].value : 'undefined'
