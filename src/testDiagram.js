@@ -1,14 +1,18 @@
 import React from 'react';
 
-let tableData = {}
-const storageData = JSON.parse(localStorage.getItem(`tableData`)) || []
-storageData.forEach(row => {tableData = {...tableData, [row[0].value]: row}})
-
-function getData(date, dataCol) {
-  return tableData[date][dataCol] ? tableData[date][dataCol].value : 'undefined'
+function getData(date, dataCol, tableData) {
+  let tabData = {}
+  tableData.forEach(row => {tabData = {...tabData, [row[1].value]: row}})
+  if (tabData[date]) {
+    console.log(tabData[date][dataCol+1] ? tabData[date][dataCol+1].value : 'undefined')
+  }
+  if (tabData[date])
+    return tabData[date][dataCol+1] ? tabData[date][dataCol+1].value : 'undefined'
+  else
+    return 'undefined'
 }
 
-export default function TestDiagram(date){
+export default function TestDiagram(date, tableData){
   const DATA_COL_INDEX = {
     DATE: 0,
     CRANE: 1,
@@ -88,12 +92,12 @@ export default function TestDiagram(date){
     <tbody style="font-size: 14px">
       <tr>
         <td style="text-align: center ; font-size: 14px"><b>m</b></td>
-        <td style="text-align: center">${getData(date, DATA_COL_INDEX['EVA_INPUT_TURBINE'])}</td>
+        <td style="text-align: center">${getData(date, DATA_COL_INDEX['EVA_INPUT_TURBINE'], tableData)}</td>
         <td style="text-align: center"><b>Ton</b></td>
       </tr>
       <tr>
         <td align="center"><font style="font-size: 14px"><b>E</b></font></td>
-        <td align="center" style="font-size: 14px">${getData(date, DATA_COL_INDEX['HOT_INPUT_TURBINE'])}</td>
+        <td align="center" style="font-size: 14px">${getData(date, DATA_COL_INDEX['HOT_INPUT_TURBINE'], tableData)}</td>
         <td align="center" style="font-size: 14px"><b>kWh</b></td>
       </tr>
     </tbody>
@@ -105,12 +109,12 @@ export default function TestDiagram(date){
     <tbody style="font-size: 14px">
       <tr>
         <td style="text-align: center ; font-size: 14px"><b>m</b></td>
-        <td style="text-align: center">${getData(date, DATA_COL_INDEX['EVA_MILL'])}</td>
+        <td style="text-align: center">${getData(date, DATA_COL_INDEX['EVA_MILL'], tableData)}</td>
         <td style="text-align: center"><b>Ton</b></td>
       </tr>
       <tr>
         <td align="center"><font style="font-size: 14px"><b>E</b></font></td>
-        <td align="center" style="font-size: 14px">${getData(date, DATA_COL_INDEX['HOT_MILL'])}</td>
+        <td align="center" style="font-size: 14px">${getData(date, DATA_COL_INDEX['HOT_MILL'], tableData)}</td>
         <td align="center" style="font-size: 14px"><b>kWh</b></td>
       </tr>
     </tbody>
@@ -122,12 +126,12 @@ export default function TestDiagram(date){
     <tbody style="font-size: 14px">
       <tr>
         <td style="text-align: center ; font-size: 14px"><b>m</b></td>
-        <td style="text-align: center">${getData(date, DATA_COL_INDEX['EVA_EVAP'])}</td>
+        <td style="text-align: center">${getData(date, DATA_COL_INDEX['EVA_EVAP'], tableData)}</td>
         <td style="text-align: center"><b>Ton</b></td>
       </tr>
       <tr>
         <td align="center"><font style="font-size: 14px"><b>E</b></font></td>
-        <td align="center" style="font-size: 14px">${getData(date, DATA_COL_INDEX['HOT_EVAP'])}</td>
+        <td align="center" style="font-size: 14px">${getData(date, DATA_COL_INDEX['HOT_EVAP'], tableData)}</td>
         <td align="center" style="font-size: 14px"><b>kWh</b></td>
       </tr>
     </tbody>
@@ -154,12 +158,12 @@ export default function TestDiagram(date){
       </tr>
       <tr>
         <td align="center" style="font-size: 14px"><b>m</b></td>
-        <td align="center" style="font-size: 14px">${getData(date, DATA_COL_INDEX['EVA_OUTPUT_TURBINE'])}</td>
+        <td align="center" style="font-size: 14px">${getData(date, DATA_COL_INDEX['EVA_OUTPUT_TURBINE'], tableData)}</td>
         <td align="center" style="font-size: 14px"><b>Ton</b></td>
       </tr>
       <tr>
         <td style="text-align: center"><b>E</b></td>
-        <td style="text-align: center">${getData(date, DATA_COL_INDEX['HOT_OUTPUT_TURBINE'])}</td>
+        <td style="text-align: center">${getData(date, DATA_COL_INDEX['HOT_OUTPUT_TURBINE'], tableData)}</td>
         <td style="text-align: center"><b>kWh</b></td>
       </tr>
     </tbody>
@@ -171,27 +175,27 @@ export default function TestDiagram(date){
     <tbody style="font-size: 14px">
       <tr>
         <td style="text-align: center ; font-size: 14px"><b>Sugar A</b></td>
-        <td style="text-align: center">${getData(date, DATA_COL_INDEX['CRUDE_SUGAR'])}</td>
+        <td style="text-align: center">${getData(date, DATA_COL_INDEX['CRUDE_SUGAR'], tableData)}</td>
         <td style="text-align: center"><b>kg</b></td>
       </tr>
       <tr>
         <td style="text-align: center"><b>Sugar B</b></td>
-        <td style="text-align: center">${getData(date, DATA_COL_INDEX['SUGAR'])}</td>
+        <td style="text-align: center">${getData(date, DATA_COL_INDEX['SUGAR'], tableData)}</td>
         <td style="text-align: center"><b>kg</b><br /></td>
       </tr>
       <tr>
         <td style="text-align: center"><b>Sugar C</b></td>
-        <td style="text-align: center">${getData(date, DATA_COL_INDEX['PURE_SUGAR'])}</td>
+        <td style="text-align: center">${getData(date, DATA_COL_INDEX['PURE_SUGAR'], tableData)}</td>
         <td style="text-align: center"><b>kg</b><br /></td>
       </tr>
       <tr>
         <td align="center" style="font-size: 14px"><b>Sugar D</b></td>
-        <td align="center" style="font-size: 14px">${getData(date, DATA_COL_INDEX['EXTRA_PURE_SUGAR'])}</td>
+        <td align="center" style="font-size: 14px">${getData(date, DATA_COL_INDEX['EXTRA_PURE_SUGAR'], tableData)}</td>
         <td align="center" style="font-size: 14px"><b>kg</b><br /></td>
       </tr>
       <tr>
         <td style="text-align: center"><b>Total</b></td>
-        <td style="text-align: center">${getData(date, DATA_COL_INDEX['TOTAL_SUGAR'])}</td>
+        <td style="text-align: center">${getData(date, DATA_COL_INDEX['TOTAL_SUGAR'], tableData)}</td>
         <td style="text-align: center"><b>kg</b></td>
       </tr>
     </tbody>
@@ -203,22 +207,22 @@ export default function TestDiagram(date){
     <tbody style="font-size: 14px">
       <tr>
         <td style="text-align: center ; font-size: 14px"><b>Crane</b></td>
-        <td style="text-align: center">${getData(date, DATA_COL_INDEX['CRANE'])}</td>
+        <td style="text-align: center">${getData(date, DATA_COL_INDEX['CRANE'], tableData)}</td>
         <td style="text-align: center"><b>kg</b></td>
       </tr>
       <tr>
         <td style="text-align: center"><b>Trash Crane</b></td>
-        <td style="text-align: center">${getData(date, DATA_COL_INDEX['TRASH_CRANE'])}</td>
+        <td style="text-align: center">${getData(date, DATA_COL_INDEX['TRASH_CRANE'], tableData)}</td>
         <td style="text-align: center"><b>kg</b><br /></td>
       </tr>
       <tr>
         <td style="text-align: center"><b>Baggases</b></td>
-        <td style="text-align: center">${getData(date, DATA_COL_INDEX['BAGGASES'])}</td>
+        <td style="text-align: center">${getData(date, DATA_COL_INDEX['BAGGASES'], tableData)}</td>
         <td style="text-align: center"><b>kg</b><br /></td>
       </tr>
       <tr>
         <td align="center" style="font-size: 14px"><b>Total Molasses</b></td>
-        <td align="center" style="font-size: 14px">${getData(date, DATA_COL_INDEX['MOLASSES'])}</td>
+        <td align="center" style="font-size: 14px">${getData(date, DATA_COL_INDEX['MOLASSES'], tableData)}</td>
         <td align="center" style="font-size: 14px"><b>kg</b><br /></td>
       </tr>
     </tbody>

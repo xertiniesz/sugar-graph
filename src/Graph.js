@@ -4,6 +4,13 @@ import Typography from '@material-ui/core/Typography';
 import { Line } from 'react-chartjs-2';
 import { withStyles } from '@material-ui/core/styles';
 import trendlineLinear from 'chartjs-plugin-trendline';
+const DataStore = require('nedb-promises');
+
+const db = DataStore.create({
+  filename: `./electron.db`,
+  timestampData: true,
+  autoload: true
+});
 
 const styles = theme => ({
   paper: {
@@ -30,7 +37,7 @@ class Graph extends React.Component {
 
     this.state = {
       mode: 'boiler',
-      tableData: JSON.parse(localStorage.getItem('tableData'))
+      tableData: []
     }
   }
   options = {
@@ -57,6 +64,19 @@ class Graph extends React.Component {
     ]
   }
 
+  componentWillMount() {
+    db.find({target: 1})
+      .then( data => {
+        const tableData = this.state.tableData
+        data[0].data.forEach(
+          (row, index) => {tableData.push([{value: index + 1, readOnly: true}, ...row])}
+        )
+
+        console.log('set')
+        this.setState({tableData, date: tableData[0][1].value})
+      })
+  }
+
   DATA_COL_INDEX = {
     DATE: 0,
     CRANE: 1,
@@ -79,8 +99,9 @@ class Graph extends React.Component {
   }
 
   totalCrane() {
-    const date = this.state.tableData.map(row => row[0].value)
-    const data = this.state.tableData.map(row => parseFloat(row[this.DATA_COL_INDEX['CRANE']].value) ? parseFloat(row[this.DATA_COL_INDEX['CRANE']].value) : 0)
+    if (this.state.tableData)
+    {const date = this.state.tableData.map(row => row[1].value)
+    const data = this.state.tableData.map(row => parseFloat(row[this.DATA_COL_INDEX['CRANE']+1].value) ? parseFloat(row[this.DATA_COL_INDEX['CRANE']+1].value) : 0)
 
     return {
       labels: date,
@@ -99,12 +120,13 @@ class Graph extends React.Component {
           }
         },
       ]
-    }
+    }}
   }
 
   totalSugar() {
-    const date = this.state.tableData.map(row => row[0].value)
-    const data = this.state.tableData.map(row => parseFloat(row[this.DATA_COL_INDEX['CRANE']].value) ? parseFloat(row[this.DATA_COL_INDEX['TOTAL_SUGAR']].value) : 0)
+    if (this.state.tableData)
+    {const date = this.state.tableData.map(row => row[1].value)
+    const data = this.state.tableData.map(row => parseFloat(row[this.DATA_COL_INDEX['CRANE']+1].value) ? parseFloat(row[this.DATA_COL_INDEX['TOTAL_SUGAR']+1].value) : 0)
 
     return {
       labels: date,
@@ -123,12 +145,13 @@ class Graph extends React.Component {
           }
         },
       ]
-    }
+    }}
   }
 
   heatToMilling() {
-    const date = this.state.tableData.map(row => row[0].value)
-    const data = this.state.tableData.map(row => parseFloat(row[this.DATA_COL_INDEX['HOT_MILL']].value) ? parseFloat(row[this.DATA_COL_INDEX['HOT_MILL']].value) : 0)
+    if (this.state.tableData)
+    {const date = this.state.tableData.map(row => row[1].value)
+    const data = this.state.tableData.map(row => parseFloat(row[this.DATA_COL_INDEX['HOT_MILL']+1].value) ? parseFloat(row[this.DATA_COL_INDEX['HOT_MILL']+1].value) : 0)
     return {
       labels: date,
       datasets: [
@@ -146,12 +169,13 @@ class Graph extends React.Component {
           }
         },
       ]
-    }
+    }}
   }
 
   energyToMilling() {
-    const date = this.state.tableData.map(row => row[0].value)
-    const data = this.state.tableData.map(row => parseFloat(row[this.DATA_COL_INDEX['EVA_MILL']].value) ? parseFloat(row[this.DATA_COL_INDEX['EVA_MILL']].value) : 0)
+    if (this.state.tableData)
+    {const date = this.state.tableData.map(row => row[1].value)
+    const data = this.state.tableData.map(row => parseFloat(row[this.DATA_COL_INDEX['EVA_MILL']+1].value) ? parseFloat(row[this.DATA_COL_INDEX['EVA_MILL']+1].value) : 0)
     return {
       labels: date,
       datasets: [
@@ -169,12 +193,13 @@ class Graph extends React.Component {
           }
         },
       ]
-    }
+    }}
   }
 
   totalHeatGenerated() {
-    const date = this.state.tableData.map(row => row[0].value)
-    const data = this.state.tableData.map(row => parseFloat(row[this.DATA_COL_INDEX['HOT_BOIL']].value) ? parseFloat(row[this.DATA_COL_INDEX['HOT_BOIL']].value) : 0)
+    if (this.state.tableData)
+    {const date = this.state.tableData.map(row => row[1].value)
+    const data = this.state.tableData.map(row => parseFloat(row[this.DATA_COL_INDEX['HOT_BOIL']+1].value) ? parseFloat(row[this.DATA_COL_INDEX['HOT_BOIL']+1].value) : 0)
     return {
       labels: date,
       datasets: [
@@ -192,12 +217,13 @@ class Graph extends React.Component {
           }
         },
       ]
-    }
+    }}
   }
 
   heatToTurbine() {
-    const date = this.state.tableData.map(row => row[0].value)
-    const data = this.state.tableData.map(row => parseFloat(row[this.DATA_COL_INDEX['HOT_INPUT_TURBINE']].value) ? parseFloat(row[this.DATA_COL_INDEX['HOT_INPUT_TURBINE']].value) : 0)
+    if (this.state.tableData)
+    {const date = this.state.tableData.map(row => row[1].value)
+    const data = this.state.tableData.map(row => parseFloat(row[this.DATA_COL_INDEX['HOT_INPUT_TURBINE']+1].value) ? parseFloat(row[this.DATA_COL_INDEX['HOT_INPUT_TURBINE']+1].value) : 0)
     return {
       labels: date,
       datasets: [
@@ -215,25 +241,61 @@ class Graph extends React.Component {
           }
         },
       ]
-    }
+    }}
   }
 
   sugarToEnergy() {
-    const rawData = this.state.tableData.map(
-      row => {
-        const sugar = parseFloat(row[this.DATA_COL_INDEX['TOTAL_SUGAR']].value) ? parseFloat(row[this.DATA_COL_INDEX['TOTAL_SUGAR']].value) : 0
-        const energy = parseFloat(row[this.DATA_COL_INDEX['TOTAL_ENERGY']].value) ? parseFloat(row[this.DATA_COL_INDEX['TOTAL_ENERGY']].value) : 0
-        return {sugar, energy}
-      })
-
-    console.log(` > rawData\n`, rawData)
-    rawData.sort(({sugar: a}, {sugar: b}) => a < b)
-    console.log(` > rawData\n`, rawData)
+    if (this.state.tableData)
+    {
+      const date = this.state.tableData.map(row => row[1].value)
+      const sugar = this.state.tableData.map(row => parseFloat(row[this.DATA_COL_INDEX['TOTAL_SUGAR']+1].value) ? parseFloat(row[this.DATA_COL_INDEX['TOTAL_SUGAR']+1].value) : 0)
+      const energy = this.state.tableData.map(row => parseFloat(row[this.DATA_COL_INDEX['TOTAL_ENERGY']+1].value) ? parseFloat(row[this.DATA_COL_INDEX['TOTAL_ENERGY']+1].value) : 0)
+      console.log(` > suag\n`, sugar)
+      console.log(` > suag\n`, energy)
+      return {
+        labels: date,
+        datasets: [
+          {
+            label: 'sugar',
+            pointBackgroundColor: "rgba(255, 0, 0, 1)",
+            pointBorderColor: "rgba(255, 0, 0, 1)",
+            showLine: true,
+            lineTension: 1,
+            id: 'sugar',
+            data: sugar,
+          },
+          {
+            label: 'Energy(kWh)',
+            pointBackgroundColor: "rgba(0, 255, 0, 1)",
+            pointBorderColor: "rgba(0, 255, 0, 1)",
+            showLine: true,
+            lineTension: 1,
+            id: 'energy',
+            data: energy,
+          },
+        ],
+        scales: {
+          xAxes: [{
+            stacked: true
+          }],
+          yAxes: [{
+            stacked: true,
+            position: "left",
+            id: "sugar",
+          }, {
+            stacked: false,
+            position: "right",
+            id: "energy",
+          }]
+        }
+      }
+    }
   }
 
   energyGenerated() {
-    const date = this.state.tableData.map(row => row[0].value)
-    const data = this.state.tableData.map(row => parseFloat(row[this.DATA_COL_INDEX['HOT_INPUT_TURBINE']].value) ? parseFloat(row[this.DATA_COL_INDEX['HOT_INPUT_TURBINE']].value) : 0)
+    if (this.state.tableData)
+    {const date = this.state.tableData.map(row => row[1].value)
+    const data = this.state.tableData.map(row => parseFloat(row[this.DATA_COL_INDEX['HOT_INPUT_TURBINE']+1].value) ? parseFloat(row[this.DATA_COL_INDEX['HOT_INPUT_TURBINE']+1].value) : 0)
     return {
       labels: date,
       datasets: [
@@ -251,7 +313,7 @@ class Graph extends React.Component {
           }
         },
       ]
-    }
+    }}
   }
 
   render() {

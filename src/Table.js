@@ -1,8 +1,8 @@
 import React from 'react';
 import Button from '@material-ui/core/Button';
-import Spreadsheet from "react-spreadsheet";
 import DataSheet from 'react-datasheet';
 import 'react-datasheet/lib/react-datasheet.css';
+const DataStore = require('nedb-promises');
 
 const header = ['', 'วันที่', 'ปริมาณอ้อย (ตัน)', 'Baggases', '%Pol Baggases', 'Filtercake',	'%Pol Baggases', 'Molasses', '%Pol Molasses',
   'น้ำตาลทรายดิบ (ตัน)',	'น้ำตาลทรายขาว (ตัน)', 'น้ำตาลทรายขาวบริสุทธิ์ (ตัน)', 'น้ำตาลทรายขาวบริสุทธิ์พิเศษ (ตัน)',
@@ -11,6 +11,11 @@ const header = ['', 'วันที่', 'ปริมาณอ้อย (ต�
   'พลังงานความร้อนที่ใช้ (kWh)', 'ปริมาณไอน้ำ (ตัน/ชั่วโมง)', 'เอนทาลปี (kJ/kg)', 'พลังงานความร้อนที่ใช้ (kWh)', 'พลังงานความร้อนรวม (kWh)'];
 
 const dataTable = [];
+const db = DataStore.create({
+  filename: `./electron.db`,
+  timestampData: true,
+  autoload: true
+});
 
 class Table extends React.Component {
   constructor(props) {
@@ -29,17 +34,36 @@ class Table extends React.Component {
     //     data.push([{value: 0, readOnly: true}, ...rowData])
     //   }
     // })
-    if (localStorage.getItem('tableData')) {
-      JSON.parse(localStorage.getItem('tableData'))
-        .forEach((row, index) => {
-          data.push([{value: index + 1, readOnly: true}, ...row])
-      })
-    }
+    // if (localStorage.getItem('tableData')) {
+    //   JSON.parse(localStorage.getItem('tableData'))
+    //     .forEach((row, index) => {
+    //       data.push([{value: index + 1, readOnly: true}, ...row])
+    //   })
+    // }
 
     this.state = {
       dataTable: data
     }
-    this.addEmptyRow()
+  }
+
+  async componentDidMount() {
+    const data = await db.find({target: 1})
+    const dataTable = this.state.dataTable
+    data[0].data.forEach(
+        (row, index) => {dataTable.push([{value: index + 1, readOnly: true}, ...row])}
+    )
+
+    console.log(data)
+    const row = this.state.dataTable[dataTable.length - 1]
+    const isLastRowEmpty = row.slice(1).reduce((result, cell) => { return result && (cell.value === '')}, true)
+    if (!isLastRowEmpty) {
+      const emptyRow = header.map(() => {return {value: ""}})
+      dataTable.push([{value: dataTable.length, readOnly: true}, ...emptyRow])
+      this.setState({ dataTable: dataTable})
+    }
+    else{
+      this.setState({dataTable})
+    }
   }
 
   addEmptyRow() {
@@ -54,9 +78,10 @@ class Table extends React.Component {
     }
   }
 
-  updateStorage(dataTable) {
+  async updateStorage(dataTable) {
     const dataToStore = dataTable.slice(1).map(row => {return row.slice(1)})
-    localStorage.setItem('tableData', JSON.stringify(dataToStore))
+    console.log(dataToStore)
+    await db.update({target: 1}, {target: 1,data: dataToStore}, {upsert: true})
   }
 
   render() {

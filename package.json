@@ -2,10 +2,25 @@
   "name": "sugar-graph",
   "version": "0.1.0",
   "private": true,
+  "author": "Teerapat Parktoop",
+  "main": "public/electron.js",
+  "homepage": "./",
+  "build": {
+    "appId": "com.example.electron-cra",
+    "files": [
+      "build/**/*",
+      "node_modules/**/*"
+    ],
+    "directories": {
+      "buildResources": "assets"
+    }
+  },
   "dependencies": {
     "@material-ui/core": "^4.2.0",
     "chart.js": "^2.8.0",
     "chartjs-plugin-trendline": "^0.1.1",
+    "electron-is-dev": "^1.1.0",
+    "nedb-promises": "^4.0.0",
     "react": "^16.8.6",
     "react-chartjs-2": "^2.7.6",
     "react-datasheet": "^1.3.14",
@@ -18,7 +33,9 @@
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "electron-dev": "concurrently \"BROWSER=none yarn start\" \"wait-on http://localhost:3000 && electron .\"",
+    "electron-dist": "electron-builder -m"
   },
   "eslintConfig": {
     "extends": "react-app"
@@ -34,5 +51,11 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+  },
+  "devDependencies": {
+    "concurrently": "^4.1.1",
+    "electron": "^6.0.0",
+    "electron-builder": "^21.2.0",
+    "wait-on": "^3.3.0"
   }
 }
