@@ -1,9 +1,8 @@
 {
   "name": "sugar-graph",
   "version": "0.1.0",
-  "private": true,
+  "private": false,
   "author": "Teerapat Parktoop",
-  "main": "public/electron.js",
   "homepage": "https://xertiniesz.github.io/sugar-graph",
   "build": {
     "appId": "com.example.electron-cra",
