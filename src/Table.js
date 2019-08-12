@@ -18,12 +18,17 @@ class Table extends React.Component {
   }
 
   componentDidMount() {
+    const tableData = []
+    console.log(`compact `, __dirname)
     this.props.db.find({target: 1})
       .then( data => {
-        const tableData = [header.map(head => {return {value: head, readOnly: true}}), ...this.state.tableData]
-        data[0].data.forEach(
-          (row, index) => {tableData.push([{value: index + 1, readOnly: true}, ...row])}
-        )
+        tableData.push(header.map(head => {return {value: head, readOnly: true}}))
+        // const tableData = [header.map(head => {return {value: head, readOnly: true}}), ...this.state.tableData]
+        if (data[0]) {
+          data[0].data.forEach(
+            (row, index) => {tableData.push([{value: index + 1, readOnly: true}, ...row])}
+          )
+        }
 
         console.log(` > tableData\n`, tableData)
         const row = tableData[tableData.length - 1]
@@ -40,26 +45,37 @@ class Table extends React.Component {
     )
   }
 
+  forceReloadIfEmpty(previousData) {
+    if (previousData) {
+      const isLastRowEmpty = previousData.slice(1).reduce((result, cell) => { return result && (cell.value === '')}, true)
+      if (isLastRowEmpty) {
+        window.location.reload(true)
+      }
+    }
+  }
+
   addEmptyRow(data) {
     const tableData = [
       header.map(head => {return {value: head, readOnly: true}}),
       ...data.map((row, index) => {return [{value: index + 1, readOnly: true}, ...row]})
     ]
-    const row = data[data.length - 1]
-    const isLastRowEmpty = row.reduce((result, cell) => { return result && (cell.value === '')}, true)
+    const row = data[data.length - 1] ? data[data.length - 1] : []
+    const isLastRowEmpty =  !row.length ? false : row.reduce((result, cell) => { return result && (cell.value === '')}, true)
     if (!isLastRowEmpty) {
       const emptyRow = [{value: tableData.length, readOnly: true}, ...header.slice(1).map(() => {return {value: ""}})]
       tableData.push(emptyRow)
-
     }
-    this.setState({ tableData: tableData})
+    const previousData = this.state.tableData[1]
+    this.setState({ tableData: tableData}, () => this.forceReloadIfEmpty(previousData))
   }
 
   removeEmptyTrail(dataToStore) {
-    const isLastRowEmpty = dataToStore[dataToStore.length - 1].reduce((result, cell) => { return result && (cell.value === '' || cell.readOnly)}, true)
-    if (isLastRowEmpty) {
-      dataToStore.splice(dataToStore.length - 1, 1)
-      this.removeEmptyTrail(dataToStore)
+    if (dataToStore.length > 0) {
+      const isLastRowEmpty = dataToStore[dataToStore.length - 1].reduce((result, cell) => { return result && (cell.value === '' || cell.readOnly)}, true)
+      if (isLastRowEmpty) {
+        dataToStore.splice(dataToStore.length - 1, 1)
+        this.removeEmptyTrail(dataToStore)
+      }
     }
   }
 

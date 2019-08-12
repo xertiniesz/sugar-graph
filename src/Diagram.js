@@ -4,6 +4,7 @@ import { withStyles } from '@material-ui/core/styles';
 import Table from './Table';
 import Grid from '@material-ui/core/Grid';
 import Typography from '@material-ui/core/Typography';
+import LinearProgress from '@material-ui/core/LinearProgress';
 import TestDiagram from './testDiagram';
 
 const styles = theme => ({
@@ -34,16 +35,25 @@ class Diagram extends React.Component {
     }
   }
 
-  componentDidMount() {
+  componentWillMount() {
     this.props.db.find({target: 1})
       .then( data => {
         const tableData = this.state.tableData
-        data[0].data.forEach(
-          (row, index) => {tableData.push([{value: index + 1, readOnly: true}, ...row])}
-        )
+        if (data[0]) {
+          data[0].data.forEach(
+            (row, index) => {tableData.push([{value: index + 1, readOnly: true}, ...row])}
+          )
+        }
 
-        this.setState({tableData, date: tableData[0][1].value}, () => this.redraw(tableData[0][1].value))
+        const date = tableData[0] ? tableData[0][1].value : ''
+        this.setState({tableData, date}, () => this.redraw(date))
       })
+  }
+
+  componentDidMount() {
+    if (this.state.tableData[0]) {
+      this.redraw(this.state.tableData[0][1].value)
+    }
   }
 
   redraw(date) {
