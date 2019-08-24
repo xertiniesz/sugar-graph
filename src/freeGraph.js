@@ -2,6 +2,8 @@ import { continueStatement } from '@babel/types'
 import React from 'react';
 import Typography from '@material-ui/core/Typography';
 import Grid from '@material-ui/core/Grid';
+import Input from '@material-ui/core/Input';
+import LinearProgress from '@material-ui/core/LinearProgress';
 import { Line } from 'react-chartjs-2';
 import trendlineLinear from 'chartjs-plugin-trendline';
 import { withStyles } from '@material-ui/core/styles';
@@ -21,22 +23,63 @@ const styles = theme => ({
     minWidth: 600,
     padding: 10,
     minHeight: 200,
+  },
+  typo: {
+    float: 'left',
+    textAlign: 'center',
+    lineHeight: '2em'
+  },
+  select: {
+    width: '15%',
+    height: '3em',
+    marginTop: 5,
+    float: 'left'
   }
 });
 
+const StyledInput = withStyles({
+  input: {
+    textAlign: 'center',
+    fontSize: '2rem'
+  }
+})(Input);
+
 class FreeGraph extends React.Component {
-  headers = ['วันที่', 'ปริมาณอ้อย (ตัน)', 'Baggases', '%Pol Baggases', 'Filtercake','%Pol Baggases', 'Molasses', '%Pol Molasses',
+  headers = ['วันที่', 'ปริมาณอ้อย (ตัน)', 'Baggases', '%Pol Baggases', 'Filtercake','%Pol Filtercake', 'Molasses', '%Pol Molasses',
     'น้ำตาลทรายดิบ (ตัน)','น้ำตาลทรายขาว (ตัน)', 'น้ำตาลทรายขาวบริสุทธิ์ (ตัน)', 'น้ำตาลทรายขาวบริสุทธิ์พิเศษ (ตัน)',
     'น้ำตาลรวม (ตัน)', 'พลังงานไฟฟ้าในกระบวนการผลิต (kWh)', 'ปริมาณไอน้ำในกระบวนการหีบอ้อย (ตัน/ชั่วโมง)', 'เอนทาลปีในกระบวนการหีบอ้อย (kJ/kg)', 'พลังงานความร้อนที่ใช้ในกระบวนการหีบอ้อย (kWh)',
     'ปริมาณไอน้ำหม้อต้มน้ำ (ตัน/ชั่วโมง)', 'เอนทาลปีหม้อต้มน้ำ (kJ/kg)', 'พลังงานความร้อนจากไอน้ำหม้อต้มน้ำ (kWh)', 'ปริมาณไอน้ำขาเข้ากังหันไอน้ำ (ตัน/ชั่วโมง)',' เอนทาลปีขาเข้ากังหันไอน้ำ (kJ/kg)',
     'พลังงานความร้อนที่ใช้ขาเข้ากังหันไอน้ำ (kWh)', 'ปริมาณไอน้ำขาออกกังหันไอน้ำ (ตัน/ชั่วโมง)', 'เอนทาลปีขาออกกังหันไอน้ำ (kJ/kg)', 'พลังงานความร้อนที่ใช้ขาออกกังหันไอน้ำ (kWh)', 'พลังงานความร้อนรวม (kWh)'];
 
-  energy = ['พลังงานไฟฟ้าในกระบวนการผลิต (kWh)', 'พลังงานความร้อนรวม (kWh)']
-  product = ['น้ำตาลรวม (ตัน)', 'น้ำตาลทรายดิบ (ตัน)','น้ำตาลทรายขาว (ตัน)', 'น้ำตาลทรายขาวบริสุทธิ์ (ตัน)', 'น้ำตาลทรายขาวบริสุทธิ์พิเศษ (ตัน)']
+  energy = ['พลังงานไฟฟ้าในกระบวนการผลิต (kWh)', 'ปริมาณไอน้ำในกระบวนการหีบอ้อย (ตัน/ชั่วโมง)', 'เอนทาลปีในกระบวนการหีบอ้อย (kJ/kg)',
+            'พลังงานความร้อนที่ใช้ในกระบวนการหีบอ้อย (kWh)', 'ปริมาณไอน้ำหม้อต้มน้ำ (ตัน/ชั่วโมง)', 'เอนทาลปีหม้อต้มน้ำ (kJ/kg)',
+            'พลังงานความร้อนจากไอน้ำหม้อต้มน้ำ (kWh)', 'ปริมาณไอน้ำขาเข้ากังหันไอน้ำ (ตัน/ชั่วโมง)',' เอนทาลปีขาเข้ากังหันไอน้ำ (kJ/kg)',
+            'พลังงานความร้อนที่ใช้ขาเข้ากังหันไอน้ำ (kWh)', 'ปริมาณไอน้ำขาออกกังหันไอน้ำ (ตัน/ชั่วโมง)', 'เอนทาลปีขาออกกังหันไอน้ำ (kJ/kg)',
+            'พลังงานความร้อนที่ใช้ขาออกกังหันไอน้ำ (kWh)', 'พลังงานความร้อนรวม (kWh)']
+  product = ['ปริมาณอ้อย (ตัน)', 'Baggases', '%Pol Baggases', 'Filtercake','%Pol Filtercake', 'Molasses', '%Pol Molasses',
+            'น้ำตาลรวม (ตัน)', 'น้ำตาลทรายดิบ (ตัน)','น้ำตาลทรายขาว (ตัน)', 'น้ำตาลทรายขาวบริสุทธิ์ (ตัน)', 'น้ำตาลทรายขาวบริสุทธิ์พิเศษ (ตัน)']
 
   options = {
     responsive: true,
     maintainAspectRatio: false,
+    scales: {
+      yAxes: [{
+        ticks: {
+          type: 'logarithmic',
+          callback: (value, index, values) => {
+            return value.toLocaleString()
+          }
+        }
+      }],
+      xAxes: [{
+        ticks: {
+          type: 'logarithmic',
+          callback: (value, index, values) => {
+            return value.toLocaleString()
+          }
+        }
+      }]
+    }
   }
 
   constructor(props) {
@@ -44,6 +87,8 @@ class FreeGraph extends React.Component {
 
     this.state = {
       tableData: [],
+      companyName: '',
+      loadCompleted: false,
       selectedHeader: 'ปริมาณอ้อย (ตัน)',
       selectedEnergy: 'พลังงานไฟฟ้าในกระบวนการผลิต (kWh)',
       selectedProduct: 'น้ำตาลรวม (ตัน)',
@@ -60,8 +105,10 @@ class FreeGraph extends React.Component {
               tableData.push(row.map(ele => ele.value))
             })
           }
-
-          this.setState({tableData})
+          this.props.db.findOne({target: 'companyName'})
+            .then(name => {
+              this.setState({tableData, companyName: name ? name.data : 'กดตรงนี้เพื่อเปลี่ยนชื่อบริษัท', loadCompleted: true})
+            })
         }
       )
   }
@@ -104,6 +151,7 @@ class FreeGraph extends React.Component {
       datasets: [
         {
           label: header,
+          showLine: false,
           fill: false,
           borderColor: "rgba(255, 0, 0, 1)",
           backgroundColor: "rgba(255, 0, 0, 1)",
@@ -123,29 +171,41 @@ class FreeGraph extends React.Component {
 
   render() {
     const { classes } = this.props;
-
+    const renderComponent = this.state.loadCompleted ?
+    <Grid className={classes.paper} container spacing={2} justify="center">
+      <Grid item style={{maxHeight: 400}}>
+        <StyledInput
+          defaultValue={this.state.companyName}
+          disableUnderline={true}
+          inputProps={{
+            'aria-label': 'description',
+          }}
+          onChange={(e) => this.props.db.update({target: 'companyName'}, {target: 'companyName', data: e.target.value}, {upsert: true})}
+        />
+      </Grid>
+      {/*<Grid item xs={12}>*/}
+      {/*  <Typography g variant="h5">ข้อมูล: </Typography>*/}
+      {/*  <select className={classes.select} onChange={(e) => this.setState({selectedHeader: e.target.value})}>*/}
+      {/*    {this.headers.slice(1).map(ele => <option value={ele}>{ele}</option>)}*/}
+      {/*  </select>*/}
+      {/*  <Line data={this.getDataByHeader(this.state.selectedHeader)} options={this.options}/>*/}
+      {/*</Grid>*/}
+      <Grid item xs={12} style={{borderTop: 'solid .5px'}}>
+        <Typography className={classes.typo} variant="h5">{`พลังงาน: `}</Typography>
+        <select className={classes.select} onChange={(e) => this.setState({selectedEnergy: e.target.value})}>
+          {this.energy.map(ele => <option value={ele}>{ele}</option>)}
+        </select>
+        <Typography className={classes.typo} variant="h5">ผลผลิต: </Typography>
+        <select className={classes.select} onChange={(e) => this.setState({selectedProduct: e.target.value})}>
+          {this.product.map(ele => <option value={ele}>{ele}</option>)}
+        </select>
+        <Line data={this.getDataByHeader(this.state.selectedProduct, this.state.selectedEnergy)} options={this.options}/>
+      </Grid>
+    </Grid> :
+    <LinearProgress />
     return (
       <div className="body">
-        <Grid className={classes.paper} container spacing={2}>
-          <Grid item xs={12}>
-            <Typography style={{float: 'left', textAlign: 'center', lineHeight: '2em'}} variant="h5">ข้อมูล: </Typography>
-            <select style={{width: '15%', height: '3em', marginTop: 5, float: 'left'}} onChange={(e) => this.setState({selectedHeader: e.target.value})}>
-              {this.headers.slice(1).map(ele => <option value={ele}>{ele}</option>)}
-            </select>
-            <Line data={this.getDataByHeader(this.state.selectedHeader)} options={this.options}/>
-          </Grid>
-          <Grid item xs={12} style={{borderTop: 'solid .5px'}}>
-            <Typography style={{float: 'left', textAlign: 'center', lineHeight: '2em'}} variant="h5">{`พลังงาน: `}</Typography>
-            <select style={{width: '15%', height: '3em', marginTop: 5, float: 'left'}} onChange={(e) => this.setState({selectedEnergy: e.target.value})}>
-              {this.energy.map(ele => <option value={ele}>{ele}</option>)}
-            </select>
-            <Typography style={{float: 'left', textAlign: 'center', lineHeight: '2em'}} variant="h5">ผลผลิต: </Typography>
-            <select style={{width: '15%', height: '3em', marginTop: 5, float: 'left'}} onChange={(e) => this.setState({selectedProduct: e.target.value})}>
-              {this.product.map(ele => <option value={ele}>{ele}</option>)}
-            </select>
-            <Line data={this.getDataByHeader(this.state.selectedProduct, this.state.selectedEnergy)} options={this.options}/>
-          </Grid>
-        </Grid>
+        {renderComponent}
       </div>
     )
   }

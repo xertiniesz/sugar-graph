@@ -8,8 +8,7 @@
     "appId": "com.example.electron-sugar",
     "files": [
       "build/**/*",
-      "node_modules/**/*",
-      "./electron.db"
+      "node_modules/**/*"
     ]
   },
   "dependencies": {
@@ -30,7 +29,7 @@
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
-    "electron-dev": "concurrently \"BROWSER=none yarn start\" \"wait-on http://localhost:3000 && electron .\"",
+    "electron-dev": "concurrently \"yarn start\" \"wait-on http://localhost:3000 && electron .\"",
     "electron-pack": "electron-builder -w --dir",
     "preelectron-pack": "yarn build",
     "predeploy": "npm run build",

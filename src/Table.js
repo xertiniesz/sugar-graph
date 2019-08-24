@@ -3,7 +3,7 @@ import Button from '@material-ui/core/Button';
 import DataSheet from 'react-datasheet';
 import 'react-datasheet/lib/react-datasheet.css';
 
-const header = ['', 'วันที่', 'ปริมาณอ้อย (ตัน)', 'Baggases', '%Pol Baggases', 'Filtercake','%Pol Baggases', 'Molasses', '%Pol Molasses',
+const header = ['', 'วันที่', 'ปริมาณอ้อย (ตัน)', 'Baggases', '%Pol Baggases', 'Filtercake','%Pol Filtercake', 'Molasses', '%Pol Molasses',
   'น้ำตาลทรายดิบ (ตัน)','น้ำตาลทรายขาว (ตัน)', 'น้ำตาลทรายขาวบริสุทธิ์ (ตัน)', 'น้ำตาลทรายขาวบริสุทธิ์พิเศษ (ตัน)',
   'น้ำตาลรวม (ตัน)', 'พลังงานไฟฟ้าในกระบวนการผลิต (kWh)', 'ปริมาณไอน้ำในกระบวนการหีบอ้อย (ตัน/ชั่วโมง)', 'เอนทาลปีในกระบวนการหีบอ้อย (kJ/kg)', 'พลังงานความร้อนที่ใช้ในกระบวนการหีบอ้อย (kWh)',
   'ปริมาณไอน้ำหม้อต้มน้ำ (ตัน/ชั่วโมง)', 'เอนทาลปีหม้อต้มน้ำ (kJ/kg)', 'พลังงานความร้อนจากไอน้ำหม้อต้มน้ำ (kWh)', 'ปริมาณไอน้ำขาเข้ากังหันไอน้ำ (ตัน/ชั่วโมง)',' เอนทาลปีขาเข้ากังหันไอน้ำ (kJ/kg)',
@@ -15,26 +15,25 @@ class Table extends React.Component {
     this.state = {
       tableData: []
     }
+
+    this.onCellChanged = this.onCellChanged.bind(this)
   }
 
   componentDidMount() {
     const tableData = []
-    console.log(`compact `, __dirname)
     this.props.db.find({target: 1})
       .then( data => {
         tableData.push(header.map(head => {return {value: head, readOnly: true}}))
-        // const tableData = [header.map(head => {return {value: head, readOnly: true}}), ...this.state.tableData]
         if (data[0]) {
           data[0].data.forEach(
             (row, index) => {tableData.push([{value: index + 1, readOnly: true}, ...row])}
           )
         }
 
-        console.log(` > tableData\n`, tableData)
         const row = tableData[tableData.length - 1]
         const isLastRowEmpty = row.slice(1).reduce((result, cell) => { return result && (cell.value === '')}, true)
         if (!isLastRowEmpty) {
-          const emptyRow = header.map(() => {return {value: ""}})
+          const emptyRow = header.slice(1).map(() => {return {value: ""}})
           tableData.push([{value: tableData.length, readOnly: true}, ...emptyRow])
           this.setState({ tableData })
         }
@@ -102,14 +101,76 @@ class Table extends React.Component {
   }
 
   formatNumber(cell) {
-    const value = cell.value
+    let value = cell.value
     if (Number.isFinite(value)) {
-      return value.toLocaleString()
+      const localValue = value.toLocaleString()
+      return localValue ? localValue : value
     }
     else {
       return value
     }
-    // return value
+  }
+
+  cellRenderer(props) {
+    const {
+      cell, row, col,
+      ...rest } = props
+    const attributes = cell.attributes || {}
+    attributes.style = {}
+    if (row < 1) {
+      attributes.style = {
+        minWidth: '50px',
+        maxWidth: '75px',
+        whiteSpace: 'unset',
+        padding: '0px 10px 0px 10px'
+      }
+    }
+
+
+    if (col < 1) {
+      attributes.style.textAlign = 'right'
+    }
+    return (
+        <td {...rest} {...attributes}>
+          {props.children}
+        </td>
+    )
+  }
+
+  onCellChanged(changes, additions) {
+
+    const tableData = this.state.tableData.map(row => [...row])
+    changes.forEach(({row, col, value}) => {
+      const modifiedValue = col > 1 ? parseFloat(value.trim().replace(/\D/gi, '')) : value
+      tableData[row][col] = {...tableData[row][col], value: modifiedValue}
+    })
+
+    const additionRow = []
+    let curRow = -1
+    let rowTemplate = [{value: tableData.length, readOnly: true}]
+
+    if (additions) {
+      additions.forEach(({row, col, value}) => {
+        if (curRow > -1 && curRow != row) {
+          additionRow[row-1] = rowTemplate
+          rowTemplate = [{value: row, readOnly: true}]
+        }
+        const modifiedValue = col > 1 ? value.trim().replace(/\D/gi, '') : value
+        rowTemplate[col] = {value: modifiedValue}
+        curRow = row
+      })
+    }
+
+    console.log(additionRow)
+    console.log([...tableData, ...additionRow.slice(tableData.length)])
+
+    this.updateStorage([...tableData, ...additionRow.slice(tableData.length)])
+  }
+
+  parsePaste(clipboardData) {
+    const paste = clipboardData.split(/\r\n|\n|\r/).filter(row => row.length > 0).map(row => row.split("\t"))
+    // console.log(paste)
+    return paste
   }
 
   render() {
@@ -123,15 +184,9 @@ class Table extends React.Component {
             data={this.state.tableData}
             overflow="clip"
             valueRenderer={this.formatNumber}
-            onCellsChanged={changes => {
-              const tableData = this.state.tableData.map(row => [...row])
-              changes.forEach(({row, col, value}) => {
-                tableData[row][col] = {...tableData[row][col], value: value.trim().replace(/,/gi, '')}
-              })
-
-              this.updateStorage(tableData)
-              // this.setState({tableData}, this.addEmptyRow)
-            }}
+            cellRenderer={this.cellRenderer}
+            onCellsChanged={this.onCellChanged}
+            parsePaste={this.parsePaste}
           />
         </div>
       </div>

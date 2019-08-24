@@ -4,9 +4,9 @@ function getData(date, dataCol, tableData) {
   let tabData = {}
   tableData.forEach(row => {tabData = {...tabData, [row[1].value]: row}})
   if (tabData[date]) {
+    const dataValue = tabData[date][dataCol+1] ? tabData[date][dataCol+1].value : 'undefined'
+    return dataValue ? dataValue.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",") : 'undefined'
   }
-  if (tabData[date])
-    return tabData[date][dataCol+1] ? tabData[date][dataCol+1].value : 'undefined'
   else
     return 'undefined'
 }
@@ -198,27 +198,27 @@ export default function TestDiagram(date, tableData){
   <table border="1" width="100%" style="width: 100% ; height: 100% ; border-collapse: collapse">
     <tbody style="font-size: 14px">
       <tr>
-        <td style="text-align: center ; font-size: 14px"><b>Sugar A</b></td>
+        <td style="text-align: center ; font-size: 14px"><b>น้ำตาลทรายดิบ</b></td>
         <td style="text-align: center">${getData(date, DATA_COL_INDEX['CRUDE_SUGAR'], tableData)}</td>
         <td style="text-align: center"><b>kg</b></td>
       </tr>
       <tr>
-        <td style="text-align: center"><b>Sugar B</b></td>
+        <td style="text-align: center"><b>น้ำตาลทรายขาว</b></td>
         <td style="text-align: center">${getData(date, DATA_COL_INDEX['SUGAR'], tableData)}</td>
         <td style="text-align: center"><b>kg</b><br /></td>
       </tr>
       <tr>
-        <td style="text-align: center"><b>Sugar C</b></td>
+        <td style="text-align: center"><b>น้ำตาลทรายขาว<br/>บริสุทธิ์</b></td>
         <td style="text-align: center">${getData(date, DATA_COL_INDEX['PURE_SUGAR'], tableData)}</td>
         <td style="text-align: center"><b>kg</b><br /></td>
       </tr>
       <tr>
-        <td align="center" style="font-size: 14px"><b>Sugar D</b></td>
+        <td align="center" style="font-size: 14px;"><b>น้ำตาลทรายขาว<br/>บริสุทธิ์พิเศษ</b></td>
         <td align="center" style="font-size: 14px">${getData(date, DATA_COL_INDEX['EXTRA_PURE_SUGAR'], tableData)}</td>
         <td align="center" style="font-size: 14px"><b>kg</b><br /></td>
       </tr>
       <tr>
-        <td style="text-align: center"><b>Total</b></td>
+        <td style="text-align: center"><b>น้ำตาลรวม</b></td>
         <td style="text-align: center">${getData(date, DATA_COL_INDEX['TOTAL_SUGAR'], tableData)}</td>
         <td style="text-align: center"><b>kg</b></td>
       </tr>

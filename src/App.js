@@ -4,14 +4,11 @@ import MenuItem from '@material-ui/core/MenuItem';
 import Diagram from './Diagram.js';
 import Graph from './Graph.js';
 import FreeGraph from './freeGraph';
+import process from 'process';
 import './App.css';
 const DataStore = require('nedb-promises');
 
-const db = DataStore.create({
-  filename: `./electron.db`,
-  timestampData: true,
-  autoload: true
-});
+const db = DataStore.create(`./electron.db`);
 
 export default class App extends React.Component {
   state = {
@@ -19,7 +16,7 @@ export default class App extends React.Component {
   }
 
   render() {
-    console.log(<Diagram/>)
+    console.log(`process.cwd() `, process.cwd())
     return(
       <div className="warpper">
         <div className="side-bar">
