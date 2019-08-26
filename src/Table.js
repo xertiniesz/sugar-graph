@@ -1,13 +1,10 @@
 import React from 'react';
 import Button from '@material-ui/core/Button';
 import DataSheet from 'react-datasheet';
+import config from './config'
 import 'react-datasheet/lib/react-datasheet.css';
 
-const header = ['', 'วันที่', 'ปริมาณอ้อย (ตัน)', 'Baggases', '%Pol Baggases', 'Filtercake','%Pol Filtercake', 'Molasses', '%Pol Molasses',
-  'น้ำตาลทรายดิบ (ตัน)','น้ำตาลทรายขาว (ตัน)', 'น้ำตาลทรายขาวบริสุทธิ์ (ตัน)', 'น้ำตาลทรายขาวบริสุทธิ์พิเศษ (ตัน)',
-  'น้ำตาลรวม (ตัน)', 'พลังงานไฟฟ้าในกระบวนการผลิต (kWh)', 'ปริมาณไอน้ำในกระบวนการหีบอ้อย (ตัน/ชั่วโมง)', 'เอนทาลปีในกระบวนการหีบอ้อย (kJ/kg)', 'พลังงานความร้อนที่ใช้ในกระบวนการหีบอ้อย (kWh)',
-  'ปริมาณไอน้ำหม้อต้มน้ำ (ตัน/ชั่วโมง)', 'เอนทาลปีหม้อต้มน้ำ (kJ/kg)', 'พลังงานความร้อนจากไอน้ำหม้อต้มน้ำ (kWh)', 'ปริมาณไอน้ำขาเข้ากังหันไอน้ำ (ตัน/ชั่วโมง)',' เอนทาลปีขาเข้ากังหันไอน้ำ (kJ/kg)',
-  'พลังงานความร้อนที่ใช้ขาเข้ากังหันไอน้ำ (kWh)', 'ปริมาณไอน้ำขาออกกังหันไอน้ำ (ตัน/ชั่วโมง)', 'เอนทาลปีขาออกกังหันไอน้ำ (kJ/kg)', 'พลังงานความร้อนที่ใช้ขาออกกังหันไอน้ำ (kWh)', 'พลังงานความร้อนรวม (kWh)'];
+const headers = config.HEADERS
 
 class Table extends React.Component {
   constructor(props) {
@@ -23,7 +20,7 @@ class Table extends React.Component {
     const tableData = []
     this.props.db.find({target: 1})
       .then( data => {
-        tableData.push(header.map(head => {return {value: head, readOnly: true}}))
+        tableData.push(headers.map(head => {return {value: head, readOnly: true}}))
         if (data[0]) {
           data[0].data.forEach(
             (row, index) => {tableData.push([{value: index + 1, readOnly: true}, ...row])}
@@ -33,7 +30,7 @@ class Table extends React.Component {
         const row = tableData[tableData.length - 1]
         const isLastRowEmpty = row.slice(1).reduce((result, cell) => { return result && (cell.value === '')}, true)
         if (!isLastRowEmpty) {
-          const emptyRow = header.slice(1).map(() => {return {value: ""}})
+          const emptyRow = headers.slice(1).map(() => {return {value: ""}})
           tableData.push([{value: tableData.length, readOnly: true}, ...emptyRow])
           this.setState({ tableData })
         }
@@ -55,13 +52,13 @@ class Table extends React.Component {
 
   addEmptyRow(data) {
     const tableData = [
-      header.map(head => {return {value: head, readOnly: true}}),
+      headers.map(head => {return {value: head, readOnly: true}}),
       ...data.map((row, index) => {return [{value: index + 1, readOnly: true}, ...row]})
     ]
     const row = data[data.length - 1] ? data[data.length - 1] : []
     const isLastRowEmpty =  !row.length ? false : row.reduce((result, cell) => { return result && (cell.value === '')}, true)
     if (!isLastRowEmpty) {
-      const emptyRow = [{value: tableData.length, readOnly: true}, ...header.slice(1).map(() => {return {value: ""}})]
+      const emptyRow = [{value: tableData.length, readOnly: true}, ...headers.slice(1).map(() => {return {value: ""}})]
       tableData.push(emptyRow)
     }
     const previousData = this.state.tableData[1]
@@ -103,7 +100,7 @@ class Table extends React.Component {
   formatNumber(cell) {
     let value = cell.value
     if (Number.isFinite(value)) {
-      const localValue = value.toLocaleString()
+      const localValue = value.toFixed(2).toLocaleString()
       return localValue ? localValue : value
     }
     else {
@@ -116,19 +113,31 @@ class Table extends React.Component {
       cell, row, col,
       ...rest } = props
     const attributes = cell.attributes || {}
-    attributes.style = {}
+    attributes.style = {
+      minWidth: '75px',
+      maxWidth: '100px',
+      whiteSpace: 'unset',
+    }
     if (row < 1) {
       attributes.style = {
-        minWidth: '50px',
-        maxWidth: '75px',
-        whiteSpace: 'unset',
-        padding: '0px 10px 0px 10px'
+        ...attributes.style,
+        paddingRight: '10px',
+        paddingLeft: '10px'
+      }
+    }
+    else {
+      attributes.style = {
+        ...attributes.style,
+        paddingLeft: '10px'
       }
     }
 
 
     if (col < 1) {
-      attributes.style.textAlign = 'right'
+      attributes.style = {
+        ...attributes.style,
+        textAlign: 'right'
+      }
     }
     return (
         <td {...rest} {...attributes}>
@@ -138,7 +147,6 @@ class Table extends React.Component {
   }
 
   onCellChanged(changes, additions) {
-
     const tableData = this.state.tableData.map(row => [...row])
     changes.forEach(({row, col, value}) => {
       const modifiedValue = col > 1 ? parseFloat(value.trim().replace(/\D/gi, '')) : value
@@ -161,10 +169,17 @@ class Table extends React.Component {
       })
     }
 
-    console.log(additionRow)
-    console.log([...tableData, ...additionRow.slice(tableData.length)])
+    const newData = [...tableData, ...additionRow.slice(tableData.length)]
+      .map(row => {
+        if (row.length < headers.length) {
+          const fillerArray = new Array(row.length - headers.length).fill('')
+          return [...row, ...fillerArray]
+        }
 
-    this.updateStorage([...tableData, ...additionRow.slice(tableData.length)])
+        return row
+      })
+
+    this.updateStorage(newData)
   }
 
   parsePaste(clipboardData) {

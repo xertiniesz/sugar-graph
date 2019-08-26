@@ -1,10 +1,15 @@
-import { continueStatement } from '@babel/types'
+import { Snackbar } from '@material-ui/core'
 import React from 'react';
 import Typography from '@material-ui/core/Typography';
 import Grid from '@material-ui/core/Grid';
 import Input from '@material-ui/core/Input';
 import LinearProgress from '@material-ui/core/LinearProgress';
 import { Line } from 'react-chartjs-2';
+import config from './config'
+import SnackbarContent from '@material-ui/core/SnackbarContent';
+import ErrorIcon from '@material-ui/icons/Error';
+import CloseIcon from '@material-ui/icons/Close';
+import IconButton from '@material-ui/core/IconButton'
 import trendlineLinear from 'chartjs-plugin-trendline';
 import { withStyles } from '@material-ui/core/styles';
 
@@ -34,7 +39,14 @@ const styles = theme => ({
     height: '3em',
     marginTop: 5,
     float: 'left'
-  }
+  },
+  message: {
+    display: 'flex',
+    alignItems: 'center',
+  },
+  error: {
+    backgroundColor: theme.palette.error.dark,
+  },
 });
 
 const StyledInput = withStyles({
@@ -45,19 +57,10 @@ const StyledInput = withStyles({
 })(Input);
 
 class FreeGraph extends React.Component {
-  headers = ['วันที่', 'ปริมาณอ้อย (ตัน)', 'Baggases', '%Pol Baggases', 'Filtercake','%Pol Filtercake', 'Molasses', '%Pol Molasses',
-    'น้ำตาลทรายดิบ (ตัน)','น้ำตาลทรายขาว (ตัน)', 'น้ำตาลทรายขาวบริสุทธิ์ (ตัน)', 'น้ำตาลทรายขาวบริสุทธิ์พิเศษ (ตัน)',
-    'น้ำตาลรวม (ตัน)', 'พลังงานไฟฟ้าในกระบวนการผลิต (kWh)', 'ปริมาณไอน้ำในกระบวนการหีบอ้อย (ตัน/ชั่วโมง)', 'เอนทาลปีในกระบวนการหีบอ้อย (kJ/kg)', 'พลังงานความร้อนที่ใช้ในกระบวนการหีบอ้อย (kWh)',
-    'ปริมาณไอน้ำหม้อต้มน้ำ (ตัน/ชั่วโมง)', 'เอนทาลปีหม้อต้มน้ำ (kJ/kg)', 'พลังงานความร้อนจากไอน้ำหม้อต้มน้ำ (kWh)', 'ปริมาณไอน้ำขาเข้ากังหันไอน้ำ (ตัน/ชั่วโมง)',' เอนทาลปีขาเข้ากังหันไอน้ำ (kJ/kg)',
-    'พลังงานความร้อนที่ใช้ขาเข้ากังหันไอน้ำ (kWh)', 'ปริมาณไอน้ำขาออกกังหันไอน้ำ (ตัน/ชั่วโมง)', 'เอนทาลปีขาออกกังหันไอน้ำ (kJ/kg)', 'พลังงานความร้อนที่ใช้ขาออกกังหันไอน้ำ (kWh)', 'พลังงานความร้อนรวม (kWh)'];
+  headers = config.HEADERS.slice(1)
 
-  energy = ['พลังงานไฟฟ้าในกระบวนการผลิต (kWh)', 'ปริมาณไอน้ำในกระบวนการหีบอ้อย (ตัน/ชั่วโมง)', 'เอนทาลปีในกระบวนการหีบอ้อย (kJ/kg)',
-            'พลังงานความร้อนที่ใช้ในกระบวนการหีบอ้อย (kWh)', 'ปริมาณไอน้ำหม้อต้มน้ำ (ตัน/ชั่วโมง)', 'เอนทาลปีหม้อต้มน้ำ (kJ/kg)',
-            'พลังงานความร้อนจากไอน้ำหม้อต้มน้ำ (kWh)', 'ปริมาณไอน้ำขาเข้ากังหันไอน้ำ (ตัน/ชั่วโมง)',' เอนทาลปีขาเข้ากังหันไอน้ำ (kJ/kg)',
-            'พลังงานความร้อนที่ใช้ขาเข้ากังหันไอน้ำ (kWh)', 'ปริมาณไอน้ำขาออกกังหันไอน้ำ (ตัน/ชั่วโมง)', 'เอนทาลปีขาออกกังหันไอน้ำ (kJ/kg)',
-            'พลังงานความร้อนที่ใช้ขาออกกังหันไอน้ำ (kWh)', 'พลังงานความร้อนรวม (kWh)']
-  product = ['ปริมาณอ้อย (ตัน)', 'Baggases', '%Pol Baggases', 'Filtercake','%Pol Filtercake', 'Molasses', '%Pol Molasses',
-            'น้ำตาลรวม (ตัน)', 'น้ำตาลทรายดิบ (ตัน)','น้ำตาลทรายขาว (ตัน)', 'น้ำตาลทรายขาวบริสุทธิ์ (ตัน)', 'น้ำตาลทรายขาวบริสุทธิ์พิเศษ (ตัน)']
+  energy = config.ENERGIES
+  product = config.PRODUCTS
 
   options = {
     responsive: true,
@@ -89,10 +92,14 @@ class FreeGraph extends React.Component {
       tableData: [],
       companyName: '',
       loadCompleted: false,
-      selectedHeader: 'ปริมาณอ้อย (ตัน)',
+      // selectedHeader: 'ปริมาณอ้อย (ตัน)',
       selectedEnergy: 'พลังงานไฟฟ้าในกระบวนการผลิต (kWh)',
       selectedProduct: 'น้ำตาลรวม (ตัน)',
+      openSnackBar: false
     }
+
+    this.selectSetState = this.selectSetState.bind(this)
+    this.handleSnackBarClose = this.handleSnackBarClose.bind(this)
   }
 
   componentWillMount() {
@@ -124,7 +131,7 @@ class FreeGraph extends React.Component {
       const tmpData = []
       this.state.tableData.forEach(row => {
         tmpData.push({
-          x: Number.isFinite(parseFloat(row[labelIndex])) ? parseFloat(row[labelIndex]) : null,
+          x: Number.isFinite(parseFloat(row[labelIndex])) ? parseFloat(row[labelIndex]) : NaN,
           y: Number.isFinite(parseFloat(row[headerIndex])) ? parseFloat(row[headerIndex]) : null})
       })
 
@@ -169,6 +176,30 @@ class FreeGraph extends React.Component {
     }
   }
 
+  selectSetState(event) {
+    const targetId = event.target.id
+    const targetValue = event.target.value
+    const index = this.headers.indexOf(targetValue)
+    const data = this.state.tableData.map(row => row[index])
+    const isAllElementFalsy = data.reduce((result, curr) => result && (!(curr === 0) && !curr), true)
+
+    if (isAllElementFalsy) {
+      this.setState({openSnackBar: true})
+      return
+    }
+
+    if (targetId === 'energy-selector') {
+      this.setState({selectedEnergy: targetValue})
+    }
+    else if (targetId === 'prod-selector') {
+      this.setState({selectedProduct: targetValue})
+    }
+  }
+
+  handleSnackBarClose() {
+    this.setState({openSnackBar: false})
+  }
+
   render() {
     const { classes } = this.props;
     const renderComponent = this.state.loadCompleted ?
@@ -192,11 +223,11 @@ class FreeGraph extends React.Component {
       {/*</Grid>*/}
       <Grid item xs={12} style={{borderTop: 'solid .5px'}}>
         <Typography className={classes.typo} variant="h5">{`พลังงาน: `}</Typography>
-        <select className={classes.select} onChange={(e) => this.setState({selectedEnergy: e.target.value})}>
+        <select className={classes.select} id="energy-selector" onChange={this.selectSetState}>
           {this.energy.map(ele => <option value={ele}>{ele}</option>)}
         </select>
         <Typography className={classes.typo} variant="h5">ผลผลิต: </Typography>
-        <select className={classes.select} onChange={(e) => this.setState({selectedProduct: e.target.value})}>
+        <select className={classes.select} id="prod-selector" onChange={this.selectSetState}>
           {this.product.map(ele => <option value={ele}>{ele}</option>)}
         </select>
         <Line data={this.getDataByHeader(this.state.selectedProduct, this.state.selectedEnergy)} options={this.options}/>
@@ -206,6 +237,29 @@ class FreeGraph extends React.Component {
     return (
       <div className="body">
         {renderComponent}
+        <Snackbar
+          anchorOrigin={{vertical: 'top', horizontal: 'center'}}
+          autoHideDuration={5000}
+          open={this.state.openSnackBar}
+          onClose={this.handleSnackBarClose}
+        >
+          <SnackbarContent
+            className={classes.error}
+            message={
+              <span className={classes.message}>
+                <ErrorIcon style={{paddingRight: '10px'}} />
+                ไม่มีข้อมูล
+              </span>
+            }
+            action={[
+              <IconButton onClick={this.handleSnackBarClose}>
+                <IconButton onClick={this.handleSnackBarClose} size="small">
+                  <CloseIcon style={{fontSize: '20', color: 'white'}}/>
+                </IconButton>
+              </IconButton>
+            ]}
+          />
+        </Snackbar>
       </div>
     )
   }

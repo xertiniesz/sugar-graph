@@ -1,3 +1,8 @@
+import { Snackbar } from '@material-ui/core'
+import IconButton from '@material-ui/core/IconButton'
+import SnackbarContent from '@material-ui/core/SnackbarContent'
+import CloseIcon from '@material-ui/icons/Close';
+import ErrorIcon from '@material-ui/icons/Error';
 import React from 'react';
 import Grid from '@material-ui/core/Grid';
 import Input from '@material-ui/core/Input';
@@ -5,13 +10,10 @@ import Typography from '@material-ui/core/Typography';
 import LinearProgress from '@material-ui/core/LinearProgress';
 import { Line } from 'react-chartjs-2';
 import { withStyles } from '@material-ui/core/styles';
+import config from './config'
 import trendlineLinear from 'chartjs-plugin-trendline';
 
-const headers = ['', 'วันที่', 'ปริมาณอ้อย (ตัน)', 'Baggases', '%Pol Baggases', 'Filtercake','%Pol Filtercake', 'Molasses', '%Pol Molasses',
-  'น้ำตาลทรายดิบ (ตัน)','น้ำตาลทรายขาว (ตัน)', 'น้ำตาลทรายขาวบริสุทธิ์ (ตัน)', 'น้ำตาลทรายขาวบริสุทธิ์พิเศษ (ตัน)',
-  'น้ำตาลรวม (ตัน)', 'พลังงานไฟฟ้าในกระบวนการผลิต (kWh)', 'ปริมาณไอน้ำในกระบวนการหีบอ้อย (ตัน/ชั่วโมง)', 'เอนทาลปีในกระบวนการหีบอ้อย (kJ/kg)', 'พลังงานความร้อนที่ใช้ในกระบวนการหีบอ้อย (kWh)',
-  'ปริมาณไอน้ำหม้อต้มน้ำ (ตัน/ชั่วโมง)', 'เอนทาลปีหม้อต้มน้ำ (kJ/kg)', 'พลังงานความร้อนจากไอน้ำหม้อต้มน้ำ (kWh)', 'ปริมาณไอน้ำขาเข้ากังหันไอน้ำ (ตัน/ชั่วโมง)',' เอนทาลปีขาเข้ากังหันไอน้ำ (kJ/kg)',
-  'พลังงานความร้อนที่ใช้ขาเข้ากังหันไอน้ำ (kWh)', 'ปริมาณไอน้ำขาออกกังหันไอน้ำ (ตัน/ชั่วโมง)', 'เอนทาลปีขาออกกังหันไอน้ำ (kJ/kg)', 'พลังงานความร้อนที่ใช้ขาออกกังหันไอน้ำ (kWh)', 'พลังงานความร้อนรวม (kWh)'];
+const headers = config.HEADERS
 
 const StyledInput = withStyles({
   input: {
@@ -43,7 +45,14 @@ const styles = theme => ({
   },
   formControl: {
     borderTop: '1px solid',
-  }
+  },
+  message: {
+    display: 'flex',
+    alignItems: 'center',
+  },
+  error: {
+    backgroundColor: theme.palette.error.dark,
+  },
 });
 
 class Graph extends React.Component {
@@ -56,6 +65,7 @@ class Graph extends React.Component {
       companyName: '',
       mode: 'boiler',
       tableData: [],
+      openSnackBar: false,
       date: [],
       data1_1: headers[2],
       data2_1: headers[3],
@@ -70,6 +80,9 @@ class Graph extends React.Component {
       dateFrom_3: null,
       dateTo_3: null,
     }
+
+    this.selectSetState = this.selectSetState.bind(this)
+    this.handleSnackBarClose = this.handleSnackBarClose.bind(this)
   }
 
   options = {
@@ -259,13 +272,31 @@ class Graph extends React.Component {
     }
   }
 
+  selectSetState(event) {
+    const targetId = event.target.id
+    const targetValue = event.target.value
+    const index = headers.indexOf(targetValue)
+    const data = this.state.tableData.map(row => row[index])
+    const isAllElementFalsy = data.reduce((result, curr) => result && (!(curr === 0) && !curr), true)
+
+    if (targetId.match('data') && isAllElementFalsy) {
+      this.setState({openSnackBar: true})
+      return
+    }
+
+    this.setState({[targetId]: targetValue})
+  }
+
+  handleSnackBarClose() {
+    this.setState({openSnackBar: false})
+  }
 
   graph(series) {
     return (
       <div>
         <div style={{display: 'flex'}}>
           <Typography variant="h6">ข้อมูล 1</Typography>
-          <select onChange={(e) => this.setState({[`data1_${series}`]: e.target.value})} style={{marginLeft: '10px', maxWidth: '150px'}}>
+          <select onChange={this.selectSetState} id={`data1_${series}`} style={{marginLeft: '10px', maxWidth: '150px'}}>
             {
               this.getRemoveSelectedList(this.state[`data2_${series}`])
                   .map((ele, index) =>
@@ -280,7 +311,7 @@ class Graph extends React.Component {
             }
           </select>
           <Typography variant="h6" style={{marginLeft: '10px'}}>ข้อมูล 2</Typography>
-          <select onChange={(e) => this.setState({[`data2_${series}`]: e.target.value})} style={{marginLeft: '10px', maxWidth: '150px'}}>
+          <select onChange={this.selectSetState} id={`data2_${series}`} style={{marginLeft: '10px', maxWidth: '150px'}}>
             {
               this.getRemoveSelectedList(this.state[`data1_${series}`])
                   .map((ele, index) =>
@@ -295,7 +326,7 @@ class Graph extends React.Component {
             }
           </select>
           <Typography variant="h6" style={{marginLeft: '10px'}}>วันที่ จาก</Typography>
-          <select onChange={(e) => this.setState({[`dateFrom_${series}`]: e.target.value})} style={{marginLeft: '10px'}}>
+          <select onChange={this.selectSetState} id={`dateFrom_${series}`} style={{marginLeft: '10px'}}>
             {
               this.state.date.map((date, index) =>
                   <option
@@ -308,7 +339,7 @@ class Graph extends React.Component {
             }
           </select>
           <Typography variant="h6" style={{marginLeft: '10px'}}>ถึง</Typography>
-          <select onChange={(e) => this.setState({[`dateTo_${series}`]: e.target.value})} style={{marginLeft: '10px', justifyContent: 'flex-end'}}>
+          <select onChange={this.selectSetState} id={`dateTo_${series}`} style={{marginLeft: '10px', justifyContent: 'flex-end'}}>
             {
               this.state.date.map((date, index) =>
                   <option
@@ -361,6 +392,29 @@ class Graph extends React.Component {
     return (
       <div className="body">
         {renderComponent}
+        <Snackbar
+          anchorOrigin={{vertical: 'top', horizontal: 'center'}}
+          autoHideDuration={5000}
+          open={this.state.openSnackBar}
+          onClose={this.handleSnackBarClose}
+        >
+          <SnackbarContent
+            className={classes.error}
+            message={
+              <span className={classes.message}>
+                <ErrorIcon style={{paddingRight: '10px'}} />
+                ไม่มีข้อมูล
+              </span>
+            }
+            action={[
+              <IconButton onClick={this.handleSnackBarClose}>
+                <IconButton onClick={this.handleSnackBarClose} size="small">
+                  <CloseIcon style={{fontSize: '20', color: 'white'}}/>
+                </IconButton>
+              </IconButton>
+            ]}
+          />
+        </Snackbar>
       </div>
     );
   }
