@@ -6,6 +6,26 @@
   height: 100vh;
 }
 
+.login {
+  display: flex !important;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background-color: #070C24 !important;
+  height: 100vh;
+}
+
+.item {
+  display: flex;
+  justify-content: center;
+  margin-top: 10px;
+  margin-left: 10px;
+}
+
+.full-width {
+  width: 225px;
+}
+
 .side-bar {
   background-color: #070C24;
   width: 15%;
