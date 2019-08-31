@@ -83,7 +83,7 @@ class Table extends React.Component {
   }
 
   download() {
-    const dataTable = this.state.dataTable
+    const dataTable = this.state.tableData
     let csvData = dataTable.slice(0, dataTable.length-1).map(row => row.slice(1).map( ele => ele.value).join(','))
     const blob = new Blob([csvData.join('\n')], {type: 'text/csv'})
 

@@ -13,7 +13,7 @@ import { withStyles } from '@material-ui/core/styles';
 import config from './config'
 import trendlineLinear from 'chartjs-plugin-trendline';
 
-const headers = config.HEADERS
+const headers = config.HEADERS_NO_UNIT
 
 const StyledInput = withStyles({
   input: {
@@ -158,39 +158,10 @@ class Graph extends React.Component {
         }
         this.props.db.findOne({target: 'companyName'})
           .then(name => {
-            console.log(`tableData `, tableData)
             this.setState({tableData, companyName: name ? name.data : 'กดตรงนี้เพื่อเปลี่ยนชื่อบริษัท', date: this.getDateArray(tableData), loadCompleted: true})
           })
       })
   }
-
-  // getGraphDataByHeader(header) {
-  //   const headerIndex = headers.indexOf(header)
-  //
-  //   const date = this.state.tableData.map(row => row[1].value)
-  //   const data = this.state.tableData.map(row => Number.isFinite(parseFloat(row[headerIndex].value)) ? parseFloat(row[headerIndex].value) : null)
-  //   return {
-  //     labels: date,
-  //     datasets: [
-  //       {
-  //         label: header,
-  //         fill: false,
-  //         showLine: false,
-  //         borderColor: "rgba(255, 0, 0, 1)",
-  //         backgroundColor: "rgba(255, 0, 0, 1)",
-  //         pointBackgroundColor: "rgba(255, 0, 0, 1)",
-  //         pointBorderColor: "rgba(255, 0, 0, 1)",
-  //         lineTension: 0,
-  //         data: data,
-  //         trendlineLinear: {
-  //           style: "rgba(255,105,180, .8)",
-  //           lineStyle: "dotted",
-  //           width: 2
-  //         }
-  //       },
-  //     ]
-  //   }
-  // }
 
   graphDataTemplate(labels, data1, label1, data2, label2) {
     return {
@@ -243,7 +214,7 @@ class Graph extends React.Component {
         parseFloat(row[index2].value) :
         row[index2].value
     )
-
+    console.log(`graph `, this.graphDataTemplate(date, data1, this.state[`data1_${series}`], data2, this.state[`data2_${series}`]))
     return this.graphDataTemplate(date, data1, this.state[`data1_${series}`], data2, this.state[`data2_${series}`])
   }
 
@@ -263,12 +234,12 @@ class Graph extends React.Component {
     if (this.state.tableData)
     {
       const date = this.state.tableData.map(row => row[1].value)
-      const sugar = this.state.tableData.map(row => parseFloat(row[headers.indexOf('น้ำตาลรวม (ตัน)')].value) ? parseFloat(row[headers.indexOf('น้ำตาลรวม (ตัน)')].value) : 0)
-      const energy = this.state.tableData.map(row => parseFloat(row[headers.indexOf('พลังงานไฟฟ้าในกระบวนการผลิต (kWh)')].value) ? parseFloat(row[headers.indexOf('พลังงานไฟฟ้าในกระบวนการผลิต (kWh)')].value) : 0)
+      const sugar = this.state.tableData.map(row => parseFloat(row[headers.indexOf('น้ำตาลรวม')].value) ? parseFloat(row[headers.indexOf('น้ำตาลรวม')].value) : 0)
+      const energy = this.state.tableData.map(row => parseFloat(row[headers.indexOf('พลังงานไฟฟ้าในกระบวนการผลิต')].value) ? parseFloat(row[headers.indexOf('พลังงานไฟฟ้าในกระบวนการผลิต')].value) : 0)
 
-      console.log(this.graphDataTemplate(date, sugar, 'น้ำตาลรวม (ตัน)', energy, 'พลังงานไฟฟ้าในกระบวนการผลิต (kWh)'))
+      console.log(this.graphDataTemplate(date, sugar, 'น้ำตาลรวม', energy, 'พลังงานไฟฟ้าในกระบวนการผลิต'))
 
-      return this.graphDataTemplate(date, sugar, 'น้ำตาลรวม (ตัน)', energy, 'พลังงานไฟฟ้าในกระบวนการผลิต (kWh)')
+      return this.graphDataTemplate(date, sugar, 'น้ำตาลรวม', energy, 'พลังงานไฟฟ้าในกระบวนการผลิต')
     }
   }
 
@@ -352,14 +323,14 @@ class Graph extends React.Component {
             }
           </select>
         </div>
-        <Line data={this.getGraphDateBySeries(series)} options={this.mixedOptions(this.state[`data1_${series}`], this.state[`data1_${series}`])}/>
+        <Line data={this.getGraphDateBySeries(series)} options={this.mixedOptions(this.state[`data1_${series}`], this.state[`data2_${series}`])}/>
       </div>
     )
   }
 
   render() {
     const { classes } = this.props;
-
+    console.log(`tableData `, this.state)
     const renderComponent = this.state.loadCompleted ?
       <Grid className={classes.paper} justify="center" container spacing={2} style={{ margin: 0, width: '100%', }}>
         <Grid item style={{maxHeight: 400}}>
@@ -374,7 +345,7 @@ class Graph extends React.Component {
         </Grid>
         <Grid item xs={12} style={{maxHeight: 400}}>
           <Typography variant="h4">พลังงาน / น้ำตาล</Typography>
-          <Line data={this.sugarToEnergy()} options={this.mixedOptions('น้ำตาลรวม (ตัน)', 'พลังงานไฟฟ้าในกระบวนการผลิต (kWh)')}/>
+          <Line data={this.sugarToEnergy()} options={this.mixedOptions('น้ำตาลรวม', 'พลังงานไฟฟ้าในกระบวนการผลิต')}/>
         </Grid>
         <Grid item xs={12} style={{maxHeight: 400, borderTop: 'solid 0.5px'}}>
           {this.graph(1)}
@@ -419,74 +390,5 @@ class Graph extends React.Component {
     );
   }
 }
-
-/*
-{
-  <Grid item xs={12} style={{maxHeight: 400, borderTop: 'solid 0.5px'}}>
-    <select onChange={(e) => this.setState({mode: e.target.value})}>
-      {
-        [ {value: 'boiler', name: 'Boiler and Turbine'},
-          {value: 'milling', name: 'Milling house'},
-          {value: 'evap', name: 'Evaporation and crystallization'},
-        ].map(
-          (item, index) => <option key={index} value={item.value}>{item.name}</option>)
-      }
-    </select>
-  </Grid>
-  this.state.mode === 'boiler' ?
-  <div style={{width: '100%'}}>
-    <Grid item xs={12} style={{maxHeight: 400}}>
-      <Typography variant="h4">พลังงานความร้อนที่ผลิตทั้งหมด</Typography>
-      <Line data={this.getGraphDataByHeader('พลังงานความร้อนรวม (kWh)')} options={this.options}/>
-    </Grid>
-    <Grid item xs={12} style={{maxHeight: 400}}>
-      <Typography variant="h4">พลังงานความร้อนที่เข้ากังหัน</Typography>
-      <Line data={this.getGraphDataByHeader('พลังงานความร้อนที่ใช้ขาเข้ากังหันไอน้ำ (kWh)')} options={this.options}/>
-    </Grid>
-    <Grid item xs={12} style={{maxHeight: 400}}>
-      <Typography variant="h4">พลังไฟฟ้าที่ผลิต</Typography>
-      <Line data={this.getGraphDataByHeader('พลังงานไฟฟ้าในกระบวนการผลิต (kWh)')} options={this.options}/>
-    </Grid>
-    <Grid item xs={12} style={{maxHeight: 400}}>
-      <Typography variant="h4">พลังงานความร้อนเหลือทิ้ง</Typography>
-      <Line data={this.getGraphDataByHeader('พลังงานความร้อนที่ใช้ขาออกกังหันไอน้ำ (kWh)')} options={this.options}/>
-    </Grid>
-  </div> :
-  this.state.mode === 'milling' ?
-  <div style={{width: '100%'}}>
-    <Grid item xs={12} style={{maxHeight: 400}}>
-      <Typography variant="h4">ปริมาณอ้อย</Typography>
-      <Line data={this.getGraphDataByHeader('ปริมาณอ้อย (ตัน)')} options={this.options}/>
-    </Grid>
-    <Grid item xs={12} style={{maxHeight: 400}}>
-      <Typography variant="h4">พลังงานความร้อนป้อนขาเข้า</Typography>
-      <Line data={this.getGraphDataByHeader('พลังงานความร้อนที่ใช้ในกระบวนการหีบอ้อย (kWh)')} options={this.options}/>
-    </Grid>
-    <Grid item xs={12} style={{maxHeight: 400}}>
-      <Typography variant="h4">พลังไฟฟ้าป้อนเข้า</Typography>
-      <Line data={this.getGraphDataByHeader('พลังงานไฟฟ้าในกระบวนการผลิต (kWh)')} options={this.options}/>
-    </Grid>
-  </div> :
-  this.state.mode === 'evap' ?
-  <div style={{width: '100%'}}>
-    <Grid item xs={12} style={{maxHeight: 400}}>
-      <Typography variant="h4">พลังงานความร้อนป้อนเข้า</Typography>
-      <Line data={this.getGraphDataByHeader('พลังงานความร้อนรวม (kWh)')} options={this.options}/>
-    </Grid>
-    <Grid item xs={12} style={{maxHeight: 400}}>
-      <Typography variant="h4">พลังงานไฟฟ้าขาเข้า</Typography>
-      <Line data={this.getGraphDataByHeader('พลังงานไฟฟ้าในกระบวนการผลิต (kWh)')} options={this.options}/>
-    </Grid>
-    <Grid item xs={12} style={{maxHeight: 400}}>
-      <Typography variant="h4">น้ำหนักอ้อย</Typography>
-      <Line data={this.getGraphDataByHeader('ปริมาณอ้อย (ตัน)')} options={this.options}/>
-    </Grid>
-    <Grid item xs={12} style={{maxHeight: 400}}>
-      <Typography variant="h4">Total sugar</Typography>
-      <Line data={this.getGraphDataByHeader('น้ำตาลรวม (ตัน)')} options={this.options}/>
-    </Grid>
-  </div> : <div></div>
-}
- */
 
 export default withStyles(styles)(Graph);

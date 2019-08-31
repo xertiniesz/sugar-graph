@@ -84,11 +84,12 @@ class Login extends React.Component {
         event.preventDefault()
         if (this.state.username === 'sugar' && this.state.password === 'sugar2019') {
             window.location.reload()
+            localStorage.setItem('login', JSON.stringify({loggedIn: true}))
         }
     }
 
     render() {
-        const { classes } = this.props;
+        console.log(localStorage.getItem('login'))
         return (
             <form className="wrapper login" onSubmit={this.handleSubmit}>
                 <div style={{border: '2px solid #FFFFFF', width: '300px', height: '250px', borderRadius: '10px'}}>

@@ -52,12 +52,13 @@ const styles = theme => ({
 const StyledInput = withStyles({
   input: {
     textAlign: 'center',
-    fontSize: '2rem'
+    fontSize: '2rem',
+    width: '100%'
   }
 })(Input);
 
 class FreeGraph extends React.Component {
-  headers = config.HEADERS.slice(1)
+  headers = config.HEADERS_NO_UNIT.slice(1)
 
   energy = config.ENERGIES
   product = config.PRODUCTS
@@ -65,8 +66,22 @@ class FreeGraph extends React.Component {
   options = {
     responsive: true,
     maintainAspectRatio: false,
+    legend: {
+      display: false
+    },
+    tooltips: {
+      callbacks: {
+        label: function(tooltipItem) {
+          return tooltipItem.yLabel;
+        }
+      }
+    },
     scales: {
       yAxes: [{
+        scaleLabel: {
+          display: true,
+          labelString: 'พลังงาน'
+        },
         ticks: {
           type: 'logarithmic',
           callback: (value, index, values) => {
@@ -75,6 +90,10 @@ class FreeGraph extends React.Component {
         }
       }],
       xAxes: [{
+        scaleLabel: {
+          display: true,
+          labelString: 'ผลผลิต'
+        },
         ticks: {
           type: 'logarithmic',
           callback: (value, index, values) => {
@@ -92,9 +111,8 @@ class FreeGraph extends React.Component {
       tableData: [],
       companyName: '',
       loadCompleted: false,
-      // selectedHeader: 'ปริมาณอ้อย (ตัน)',
-      selectedEnergy: 'พลังงานไฟฟ้าในกระบวนการผลิต (kWh)',
-      selectedProduct: 'น้ำตาลรวม (ตัน)',
+      selectedEnergy: 'พลังงานไฟฟ้าในกระบวนการผลิต',
+      selectedProduct: 'น้ำตาลรวม',
       openSnackBar: false
     }
 
@@ -137,7 +155,9 @@ class FreeGraph extends React.Component {
 
       tmpData.sort((a, b) => a.x - b.x)
 
-      tmpData.forEach(point => {
+      const filteredData = tmpData.filter(value => !!value.x)
+
+      filteredData.forEach(point => {
         if (point.x !== null) {
           labels.push(point.x)
           data.push(point.y)
@@ -158,7 +178,7 @@ class FreeGraph extends React.Component {
       datasets: [
         {
           label: header,
-          showLine: false,
+          showLine: true,
           fill: false,
           borderColor: "rgba(255, 0, 0, 1)",
           backgroundColor: "rgba(255, 0, 0, 1)",
@@ -214,13 +234,6 @@ class FreeGraph extends React.Component {
           onChange={(e) => this.props.db.update({target: 'companyName'}, {target: 'companyName', data: e.target.value}, {upsert: true})}
         />
       </Grid>
-      {/*<Grid item xs={12}>*/}
-      {/*  <Typography g variant="h5">ข้อมูล: </Typography>*/}
-      {/*  <select className={classes.select} onChange={(e) => this.setState({selectedHeader: e.target.value})}>*/}
-      {/*    {this.headers.slice(1).map(ele => <option value={ele}>{ele}</option>)}*/}
-      {/*  </select>*/}
-      {/*  <Line data={this.getDataByHeader(this.state.selectedHeader)} options={this.options}/>*/}
-      {/*</Grid>*/}
       <Grid item xs={12} style={{borderTop: 'solid .5px'}}>
         <Typography className={classes.typo} variant="h5">{`พลังงาน: `}</Typography>
         <select className={classes.select} id="energy-selector" onChange={this.selectSetState}>
@@ -230,7 +243,7 @@ class FreeGraph extends React.Component {
         <select className={classes.select} id="prod-selector" onChange={this.selectSetState}>
           {this.product.map(ele => <option value={ele}>{ele}</option>)}
         </select>
-        <Line data={this.getDataByHeader(this.state.selectedProduct, this.state.selectedEnergy)} options={this.options}/>
+        <Line data={this.getDataByHeader(this.state.selectedEnergy, this.state.selectedProduct)} options={this.options}/>
       </Grid>
     </Grid> :
     <LinearProgress />

@@ -4,6 +4,8 @@ import { withStyles } from '@material-ui/core/styles';
 import Table from './Table';
 import Grid from '@material-ui/core/Grid';
 import Typography from '@material-ui/core/Typography';
+import KMITL from './kmitl_logo.png';
+import OCSB from './LOGO_OCSB.jpg';
 import LinearProgress from '@material-ui/core/LinearProgress';
 import TestDiagram from './testDiagram';
 
@@ -22,6 +24,12 @@ const styles = theme => ({
     minWidth: 600,
     padding: 10,
     minHeight: 200,
+  },
+  image: {
+    marginLeft: theme.spacing(10),
+    marginRight: theme.spacing(10),
+    marginTop: theme.spacing(3),
+    marginBottom: theme.spacing(3),
   }
 });
 
@@ -87,9 +95,21 @@ class Diagram extends React.Component {
 
     return(
       <div id="diagram-body" className="body">
-        <Grid className={classes.paper} container spacing={2} style={{ margin: 0, width: '100%', }}>
+        <Grid className={classes.paper} container spacing={2}
+              direction="column"
+              alignItems="center"
+              justify="center" style={{ margin: 0, width: '100%', }}>
           <Grid item xs={12} style={{display: 'flex', justifyContent: 'center', flexDirection: 'column'}}>
             <Typography variant="h4">Diagram</Typography>
+          </Grid>
+          <Grid item xs={12} style={{display: 'flex', justifyContent: 'center', flexDirection: 'row'}}>
+            <img className={classes.image} height="200px" src={OCSB}/>
+            <img className={classes.image} height="200px" src={KMITL}/>
+          </Grid>
+          <Grid item xs={12} style={{display: 'flex', justifyContent: 'center', flexDirection: 'column'}}>
+            <Typography variant="h4">โปรแกรมการประเมินประสิทธิภาพการใช้พลังงานในกระบวนการผลิตน้ำตาลทราย</Typography>
+          </Grid>
+          <Grid item xs={12} style={{display: 'flex', justifyContent: 'center', flexDirection: 'column'}}>
             <br/>
             <div>
               วันที่:

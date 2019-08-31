@@ -17,6 +17,7 @@
     "@material-ui/icons": "^4.2.1",
     "chart.js": "^2.8.0",
     "chartjs-plugin-trendline": "^0.1.1",
+    "electron-browser-storage": "^1.0.6",
     "electron-is-dev": "^1.1.0",
     "gh-pages": "^2.1.0",
     "nedb-promises": "^4.0.0",
