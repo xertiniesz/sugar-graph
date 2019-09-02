@@ -25,8 +25,6 @@ export default class App extends React.Component {
   }
 
   render() {
-    console.log(`process.cwd() `, process.cwd())
-    console.log(`Logged `, this.state.isLoggedIn)
     const renderElement =
       this.state.isLoggedIn ?
       <div className="warpper">

@@ -9,7 +9,8 @@ import config from './config'
 import SnackbarContent from '@material-ui/core/SnackbarContent';
 import ErrorIcon from '@material-ui/icons/Error';
 import CloseIcon from '@material-ui/icons/Close';
-import IconButton from '@material-ui/core/IconButton'
+import IconButton from '@material-ui/core/IconButton';
+import LinearRegression from './LinearRegression';
 import trendlineLinear from 'chartjs-plugin-trendline';
 import { withStyles } from '@material-ui/core/styles';
 
@@ -83,7 +84,7 @@ class FreeGraph extends React.Component {
           labelString: 'พลังงาน'
         },
         ticks: {
-          type: 'logarithmic',
+          beginAtZero: true,
           callback: (value, index, values) => {
             return value.toLocaleString()
           }
@@ -94,11 +95,13 @@ class FreeGraph extends React.Component {
           display: true,
           labelString: 'ผลผลิต'
         },
+        type: 'linear',
         ticks: {
-          type: 'logarithmic',
+          beginAtZero: true,
           callback: (value, index, values) => {
             return value.toLocaleString()
-          }
+          },
+          stepSize: 100
         }
       }]
     }
@@ -138,61 +141,64 @@ class FreeGraph extends React.Component {
       )
   }
 
-  getDataByHeader(header, label = 'วันที่') {
+  getDataByHeader(header, label) {
     const headerIndex = this.headers.indexOf(header)
     const labelIndex = this.headers.indexOf(label)
 
-    const labels = []
+
     const data = []
+    let filteredData = []
 
     if (label !== 'วันที่') {
-      const tmpData = []
       this.state.tableData.forEach(row => {
-        tmpData.push({
-          x: Number.isFinite(parseFloat(row[labelIndex])) ? parseFloat(row[labelIndex]) : NaN,
-          y: Number.isFinite(parseFloat(row[headerIndex])) ? parseFloat(row[headerIndex]) : null})
+        data.push({
+          x: Number.isFinite(parseInt(row[labelIndex])) ? parseInt(row[labelIndex]) : NaN,
+          y: Number.isFinite(parseInt(row[headerIndex])) ? parseInt(row[headerIndex]) : null})
       })
 
-      tmpData.sort((a, b) => a.x - b.x)
+      data.sort((a, b) => a.x - b.x)
 
-      const filteredData = tmpData.filter(value => !!value.x)
+      filteredData = data.filter(value => !!value.x)
 
-      filteredData.forEach(point => {
-        if (point.x !== null) {
-          labels.push(point.x)
-          data.push(point.y)
-        }
-      })
-    }
-    else {
-      this.state.tableData.forEach(row => {
-        data.push(Number.isFinite(parseFloat(row[headerIndex])) ? parseFloat(row[headerIndex]) : null)
-      })
-      this.state.tableData.forEach(row => {
-        labels.push(row[labelIndex])
-      })
-    }
+      const x = filteredData.map(value => value.x)
+      const maxX = Math.max(...x)
+      const minX = Math.min(...x)
+      const roundedMaxX = maxX + 100 - (maxX - Math.floor(maxX / 100) * 100)
+      const roundedMinX = minX - (minX - Math.floor(minX / 100) * 100)
+      const y = filteredData.map(value => value.y)
+      const lp = new LinearRegression(x, y)
+      lp.compute()
 
-    return {
-      labels: labels,
-      datasets: [
-        {
-          label: header,
-          showLine: true,
-          fill: false,
-          borderColor: "rgba(255, 0, 0, 1)",
-          backgroundColor: "rgba(255, 0, 0, 1)",
-          pointBackgroundColor: "rgba(255, 0, 0, 1)",
-          pointBorderColor: "rgba(255, 0, 0, 1)",
-          lineTension: 0,
-          data: data,
-          trendlineLinear: {
-            style: "rgba(255,105,180, .8)",
-            lineStyle: "dotted",
-            width: 2
-          }
-        },
-      ]
+      return {
+        // labels: labels,
+        datasets: [
+          {
+            label: header,
+            showLine: false,
+            fill: false,
+            borderColor: "rgba(255, 0, 0, 1)",
+            backgroundColor: "rgba(255, 0, 0, 1)",
+            pointBackgroundColor: "rgba(255, 0, 0, 1)",
+            pointBorderColor: "rgba(255, 0, 0, 1)",
+            lineTension: 0,
+            data: filteredData,
+            trendlineLinear: {
+              style: "rgba(255,105,180, .8)",
+              lineStyle: "dotted",
+              width: 2
+            }
+          },
+          {
+            showLine: true,
+            borderColor: "rgba(200, 0, 200, 0.4)",
+            backgroundColor: "rgba(255, 255, 255, 0)",
+            pointBorderColor: "rgba(255, 255, 255, 0)",
+            borderDash: [5, 10],
+            fill: false,
+            data: [{x:roundedMinX, y: lp.evaluateAt(roundedMinX)}, {x:roundedMaxX, y: lp.evaluateAt(roundedMaxX)}],
+          },
+        ]
+      }
     }
   }
 
@@ -237,11 +243,11 @@ class FreeGraph extends React.Component {
       <Grid item xs={12} style={{borderTop: 'solid .5px'}}>
         <Typography className={classes.typo} variant="h5">{`พลังงาน: `}</Typography>
         <select className={classes.select} id="energy-selector" onChange={this.selectSetState}>
-          {this.energy.map(ele => <option value={ele}>{ele}</option>)}
+          {this.energy.map(ele => <option value={ele} selected={ele === this.state.selectedEnergy}>{ele}</option>)}
         </select>
         <Typography className={classes.typo} variant="h5">ผลผลิต: </Typography>
         <select className={classes.select} id="prod-selector" onChange={this.selectSetState}>
-          {this.product.map(ele => <option value={ele}>{ele}</option>)}
+          {this.product.map(ele => <option value={ele} selected={ele === this.state.selectedProduct}>{ele}</option>)}
         </select>
         <Line data={this.getDataByHeader(this.state.selectedEnergy, this.state.selectedProduct)} options={this.options}/>
       </Grid>
